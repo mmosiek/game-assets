@@ -1,0 +1,14 @@
+<!doctype html><meta charset="utf-8"><title>Ruffle</title>
+<style>html,body{margin:0;height:100%;overflow:hidden}#player{position:fixed;inset:0}</style>
+<script src="https://unpkg.com/@ruffle-rs/ruffle"></script>
+<div id="player"></div>
+<script>
+const swf=new URLSearchParams(location.search).get("flash");
+document.body.innerHTML=swf?document.body.innerHTML:"?flash=url.swf";
+if(swf){
+  const p=RufflePlayer.newest().createPlayer();
+  p.style.cssText="width:100%;height:100%";
+  player.append(p);
+  p.load(swf);
+}
+</script>
