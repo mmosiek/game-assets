@@ -1,10 +1,4 @@
 <!DOCTYPE html>
-
-
-<!-- Ultimate Game Stash file--> 
-<!-- For the regularly updating doc go to https://docs.google.com/document/d/1_FmH3BlSBQI7FGgAQL59-ZPe8eCxs35wel6JUyVaG8Q/ --> 
-
-
 <html lang="en-us">
 <base href="https://cdn.jsdelivr.net/gh/bubbls/UGS-Assets@354e3c6939a08e472482653567d566ba3a2aa527/half%20life/">
 <head>
@@ -15,6 +9,7 @@
 	<meta name="MobileOptimized" content="640" />
 	<meta name="HandheldFriendly" content="true" />
 	<title>Xash</title>
+
 	<script>
 		document.addEventListener('contextmenu', event => event.preventDefault());
 		window.onbeforeunload = function(e) {
@@ -24,11 +19,8 @@
 
 		document.onkeydown = function(e) {
 			e = e || window.event;
-
 			if (!e.ctrlKey) return;
-
 			var code = e.which || e.keyCode;
-
 			switch (code) {
 				case 83:
 				case 87:
@@ -37,6 +29,7 @@
 					break;
 			}
 		};
+
 		var a = new Audio('music.mp3');
 		var pashalka_count = 0;
 
@@ -47,13 +40,17 @@
 		window.addEventListener('click', play_sound);
 		window.addEventListener('keydown', play_sound);
 	</script>
+
 	<style>
-		body {
-			font-family: arial;
+		html, body {
+			width: 100%;
+			height: 100%;
 			margin: 0;
-			padding: none;
+			padding: 0;
+			overflow: hidden; /* pełny ekran bez scrolla */
 			background-color: #555555;
 			color: #f0b418;
+			font-family: arial;
 		}
 
 		.emscripten {
@@ -63,58 +60,19 @@
 			display: block;
 		}
 
-		div.emscripten {
-			text-align: center;
-		}
-
-		div.emscripten_border {}
+		div.emscripten { text-align: center; }
+		div.emscripten_border { width: 100%; height: 100%; }
 
 		canvas.emscripten {
 			border: 0px none;
 			background-image: url(xd.png);
 			box-shadow: #ffa600 0px 0px 9px 4px;
+
+			/* FULL SCREEN */
+			width: 100vw;
+			height: 100vh;
+			display: block;
 		}
-
-		@-webkit-keyframes rotation {
-			from {
-				-webkit-transform: rotate(0deg);
-			}
-
-			to {
-				-webkit-transform: rotate(360deg);
-			}
-		}
-
-		@-moz-keyframes rotation {
-			from {
-				-moz-transform: rotate(0deg);
-			}
-
-			to {
-				-moz-transform: rotate(360deg);
-			}
-		}
-
-		@-o-keyframes rotation {
-			from {
-				-o-transform: rotate(0deg);
-			}
-
-			to {
-				-o-transform: rotate(360deg);
-			}
-		}
-
-		@keyframes rotation {
-			from {
-				transform: rotate(0deg);
-			}
-
-			to {
-				transform: rotate(360deg);
-			}
-		}
-
 
 		#controls {
 			display: inline-block;
@@ -153,23 +111,13 @@
 		}
 
 		@-webkit-keyframes spin {
-			0% {
-				-webkit-transform: rotate(0deg);
-			}
-
-			100% {
-				-webkit-transform: rotate(360deg);
-			}
+			0% { -webkit-transform: rotate(0deg); }
+			100% { -webkit-transform: rotate(360deg); }
 		}
 
 		@keyframes spin {
-			0% {
-				transform: rotate(0deg);
-			}
-
-			100% {
-				transform: rotate(360deg);
-			}
+			0% { transform: rotate(0deg); }
+			100% { transform: rotate(360deg); }
 		}
 
 		a.glow,
@@ -192,17 +140,10 @@
 			text-shadow: -1px 1px 8px #ffa600, 1px -1px 8px #ffa600;
 		}
 
-		hr {
-			border-color: #ffa600;
-		}
+		hr { border-color: #ffa600; }
 
-		#label_file_select {
-			padding: 1px 6px;
-		}
-
-		input[type="file"i] {
-			display: none;
-		}
+		#label_file_select { padding: 1px 6px; }
+		input[type="file"i] { display: none; }
 
 		input[type="text"i] {
 			color: #f0b418;
@@ -221,85 +162,96 @@
 			user-select: none;
 			outline: none;
 		}
-
-		if (document.createElement("detect").style.textShadow==="") {
-			document.getElementsByTagName("html")[0].className+=" textshadow";
-		}
-  		html, body {
-    		width: 100%;
-    		height: 100%;
-    		margin: 0;
-    		overflow: hidden;
-  		}
-
-  		#canvas {
-    		display: block;
-    		width: 100vw;
-    		height: 100vh;
-  		}
 	</style>
 </head>
 
-<body onerror=alert(event); bgcolor=#555555 text=#F0B418 link=#ffa600 vlink=#ffa600>
+<body onerror="alert(event);" bgcolor="#555555" text="#F0B418" link="#ffa600" vlink="#ffa600">
 	<div class="emscripten_border">
 		<canvas style="display:none" class="emscripten" id="canvas" oncontextmenu="event.preventDefault()"></canvas>
 	</div>
 
 	<p>
-	<div style=width:100%;height:0px>
+	<div style="width:100%;height:0px">
 		<div style="float:left;" id="status">Downloading...</div>
 		<div id="progress1" style="position:relative;z-index:10;display:none;float:right;width:70%;border-color:#F0B418;border-style:solid;border-width:2px;height:20px; visibility: hidden;">
-			<div id=progress style="text-align:center;background-color:#F0B418;border-color:#555555;border-style:solid:border-width:3px;width:50%;height:20px; visibility: hidden;"></div>
+			<div id="progress" style="text-align:center;background-color:#F0B418;border-color:#555555;border-style:solid:border-width:3px;width:50%;height:20px; visibility: hidden;"></div>
 		</div><br>
 	</div><br></p>
 
-	<textarea style='visibility: hidden;' id="output" rows="8" style="display: none;"></textarea>
-	<div style='visibility: hidden;' id="asyncDialog" style="float:left"></div>
+	<textarea style="visibility: hidden; display:none;" id="output" rows="8"></textarea>
+	<div style="visibility: hidden;" id="asyncDialog"></div>
 
-    <div hidden>
-	<center> <a class="glow">
-		<div id=optionsTitle>
-			<h1>Xash</h1>
+	<div hidden>
+		<center>
+			<a class="glow">
+				<div id="optionsTitle"><h1>Xash</h1></div>
+			</a>
+		</center>
+
+		<center>
+			<form style="display:none" id="fSettings">
+				<a class="glow">Select filesystem for save and restore:</a>
+				<div id="idbHider" style="display:none">
+					<label><input name="a" type="radio" id="rIndexedDB" checked="true" />IndexedDB</label><br>
+				</div>
+				<label><input name="a" type="radio" id="rLocalStorage" />in Local storage</label><br>
+				<label><input name="a" type="radio" id="rNone" />in RAM</label><br><br>
+				<hr>
+				<div id="zipHider" style="display:none">
+					<label><input name="b" type="radio" id="rZip" checked="true" />ZIP archive from server</label>
+					<select id="selectZip" style="display:none"></select><br>
+				</div>
+
+				<label><input name="b" type="radio" id="rLocalZip" />Local ZIP file:</label>
+				<label id="label_file_select">
+					<input type="file" name="c" id="iZipFile" />
+					<a class="glow"> Select ZIP file </a>
+				</label><br><br><hr>
+
+				Command-line arguments: <input name="d" type="text" id="iArgs" value="-dev 1 -game valve" /><br><br>
+				<a class="glow" onclick="startXash();return false;">Launch Xash!</a>
+				<br><hr>
+				<div id="linksPlaceholder" style="display:none">Download archives to load locally next time:</div><br>
+
+				<div id="pkgHider" style="display:none">
+					<label><input name="b" type="radio" id="rPackage" />Package</label>
+					<select id="selectPkg" style="display:none"></select><br>
+				</div>
+
+				<div style="visibility: hidden;" class="loader" id="loader1"></div>
+			</form>
+		</center>
+
+		<div style="width:100%">
+			<span id="controls">
+				<a style="visibility: hidden;" class="glow">
+					<span>
+						<label id="label_show_console_log" style="display: none;">
+							<input type="checkbox" id="show_console_log">Show Console Log
+						</label>
+					</span>
+				</a>
+				<a style="visibility: hidden;" class="glow">
+					<span><label><input type="checkbox" id="resize">Resize canvas</label></span>
+				</a>
+				<a style="visibility: hidden;" class="glow">
+					<span><label><input type="checkbox" id="pointerLock" checked>Lock/hide mouse pointer &nbsp;&nbsp;&nbsp;</label></span>
+				</a>
+				<span style="visibility: hidden;">
+					<input type="button" value="Fullscreen" onclick="Module.requestFullscreen(document.getElementById('pointerLock').checked, document.getElementById('resize').checked)">
+				</span>
+			</span>
 		</div>
-	</a></center>
-	<center> <form style=display:none id=fSettings>
-		<a class='glow'>Select filesystem for save and restore:</a>
-		<div id=idbHider style=display:none><label><input name=a type=radio id=rIndexedDB checked=true />IndexedDB</label><br></div>
-		<label><input name=a type=radio id=rLocalStorage />in Local storage</label><br>
-		<label><input name=a type=radio id=rNone />in RAM</label><br><br>
-		<hr>
-			<div id=zipHider style=display:none><input name=b type=radio id=rZip checked=true />ZIP archive from server
-		</label><select id=selectZip style=display:none></select><br></div>
+	</div>
 
-		<label><input name=b type=radio id=rLocalZip />Local ZIP file:</label><label id="label_file_select"><input type=file name=c id=iZipFile /><a class='glow'> Select ZIP file </a></label><br><br><hr>
-		Command-line arguments: <input name=d type=text id=iArgs value="-dev 1 -game valve" /><br><br>
-		<a class='glow' onclick="startXash();return false;">Launch Xash!</a>
-		<br><hr>
-		<div id='linksPlaceholder' style=display:none>Download archives to load locally next time:</div><br>
-		<label>
-			<div id=pkgHider style=display:none><input name=b type=radio id=rPackage />
-		</label><select id=selectPkg style=display:none></select><br></div>
-		<label>
-		<div style='visibility: hidden;' class="loader" id=loader1></div>
-	</form> </label>
-
-	<div style=width:100%><span id='controls'>
-			<a style='visibility: hidden;' class="glow"><span><label id="label_show_console_log" style="display: none;"><input type="checkbox" id="show_console_log">Show Console Log</label></span></a>
-			<a style='visibility: hidden;' class="glow"><span><label><input type="checkbox" id="resize">Resize canvas</label></span></a>
-			<a style='visibility: hidden;' class="glow"><span><label><input type="checkbox" id="pointerLock" checked>Lock/hide mouse pointer &nbsp;&nbsp;&nbsp;</label></span></a>
-			<span style='visibility: hidden;'><input type="button" value="Fullscreen" onclick="Module.requestFullscreen(document.getElementById('pointerLock').checked, document.getElementById('resize').checked)"></span>
-	</span></div>
-</div>
-
-	<script type='text/javascript' src='browserfs.min.js'></script>
-	<script type='text/javascript'>
+	<script type="text/javascript" src="browserfs.min.js"></script>
+	<script type="text/javascript">
 		var zipMods = [];
 		var pkgMods = [];
 	</script>
+	<script type="text/javascript" src="mods.js"></script>
 
-	<script type='text/javascript' src='mods.js'></script>
-
-	<script type='text/javascript'>
+	<script type="text/javascript">
 		var show_again = true;
 		var statusElement = document.getElementById('status');
 		var progressElement = document.getElementById('progress');
@@ -309,19 +261,25 @@
 		var mounted = false;
 		var gamedir = 'valve';
 		var moduleCount = 0;
-		//var mem = 150;
 		var mfs;
-		var zipSize;
-
 
 		if (!ArrayBuffer['isView']) {
 			ArrayBuffer.isView = function(a) {
 				return a !== null && typeof(a) === "object" && a['buffer'] instanceof ArrayBuffer;
 			};
-
 		}
 
 		showElement('optionsTitle', false);
+
+		// FULLSCREEN: dopasuj realną rozdzielczość canvas do okna (bez rozmycia)
+		function fitCanvasToWindow() {
+			var c = document.getElementById('canvas');
+			if (!c) return;
+			var dpr = window.devicePixelRatio || 1;
+			c.width  = Math.floor(window.innerWidth  * dpr);
+			c.height = Math.floor(window.innerHeight * dpr);
+		}
+		window.addEventListener('resize', fitCanvasToWindow);
 
 		function prepareSelects() {
 			var len = zipMods.length;
@@ -338,20 +296,17 @@
 					select.style.display = 'block';
 					document.getElementById('linksPlaceholder').innerHTML += links;
 				}
-			} else
-				document.getElementById('rZip').checked = false;
+			} else document.getElementById('rZip').checked = false;
+
 			len = pkgMods.length;
 			select = document.getElementById('selectPkg');
 			if (len) {
 				showElement('pkgHider', true);
-
 				if (len > 1) {
 					for (var i = 0; i < len; i++)
 						select.options[i] = new Option(pkgMods[i][1], pkgMods[i][0]);
-					//select.style.display = 'block';
 				}
-			} else
-				document.getElementById('rPackage').checked = false;
+			} else document.getElementById('rPackage').checked = false;
 
 			if (!zipMods.length && !len) {
 				document.getElementById('rLocalZip').checked = true;
@@ -359,9 +314,7 @@
 			}
 		}
 
-		try {
-			mem = Math.round(window.location.hash.substring(1));
-		} catch (e) {};
+		try { mem = Math.round(window.location.hash.substring(1)); } catch (e) {}
 
 		var Module = {
 			TOTAL_MEMORY: mem * 1024 * 1024,
@@ -375,19 +328,15 @@
 					if (text) {
 						myerrorbuf += text + '\n';
 						console.log(text);
-						if (text == "exit(0)")
-						{
+						if (text == "exit(0)") {
 							document.getElementById('canvas').style.display = "none";
-							setTimeout(function(){
-								location.reload();
-							}, 1000);
-						}
-						else if (text == "shader success") {
+							setTimeout(function(){ location.reload(); }, 1000);
+						} else if (text == "shader success") {
 							pashalka_count = 100;
 							a.pause();
-                            let canvass = document.getElementById('canvas');
+							let canvass = document.getElementById('canvas');
 							canvass.style.display = "block";
-						} else {
+							fitCanvasToWindow(); // FULLSCREEN
 						}
 					}
 					if (element) {
@@ -395,23 +344,19 @@
 							element.value = element.value.substring(512) + myerrorbuf;
 						else
 							element.value += myerrorbuf;
-						element.scrollTop = element.scrollHeight; // focus on bottom
+						element.scrollTop = element.scrollHeight;
 					}
 					myerrorbuf = ''
 				};
 			})(),
 			printErr: function(text) {
 				if (arguments.length > 1) text = Array.prototype.slice.call(arguments).join(' ');
-				if (0) { // XXX disabled for safety typeof dump == 'function') {
-					dump(text + '\n'); // fast, straight to the real console
-				} else {
-					if (myerrorbuf.length > 2048)
-						myerrorbuf = 'some lines skipped\n' + myerrorbuf.substring(512);
-					myerrorbuf += text + '\n';
-					if (new Date() - myerrordate > 3000) {
-						myerrordate = new Date();
-						Module.print();
-					}
+				if (myerrorbuf.length > 2048)
+					myerrorbuf = 'some lines skipped\n' + myerrorbuf.substring(512);
+				myerrorbuf += text + '\n';
+				if (new Date() - myerrordate > 3000) {
+					myerrordate = new Date();
+					Module.print();
 				}
 			},
 			canvas: (function() {
@@ -420,24 +365,18 @@
 					alert('WebGL context lost. You will need to reload the page.');
 					e.preventDefault();
 				}, false);
-
 				return canvas;
 			})(),
 			setStatus: function(text) {
-				if (!Module.setStatus.last) Module.setStatus.last = {
-					time: Date.now(),
-					text: ''
-				};
+				if (!Module.setStatus.last) Module.setStatus.last = { time: Date.now(), text: '' };
 				if (text === Module.setStatus.text) return;
 				if (new Date() - myerrordate > 3000) {
 					myerrordate = new Date();
 					Module.print();
 				}
-
 				statusElement.innerHTML = text;
 				if (progressElement) {
 					var m = text.match(/([^(]+)\((\d+(\.\d+)?)\/(\d+)\)/);
-
 					if (m) {
 						var progress = Math.round(parseInt(m[2]) * 100 / parseInt(m[4]));
 						progressElement.style.color = progress > 5 ? '#303030' : '#aaa000';
@@ -453,24 +392,18 @@
 					Module.setStatus('Preparing... (' + (this.totalDependencies - left) + '/' + this.totalDependencies + ')');
 			}
 		};
+
 		window.onerror = function(event) {
 			if (mounted)
-				FS.syncfs(false, function(err) {
-					Module.print('Saving IDBFS: ' + err);
-				});
-			if (('' + event).indexOf('SimulateInfiniteLoop') > 0)
-				return;
+				FS.syncfs(false, function(err) { Module.print('Saving IDBFS: ' + err); });
+			if (('' + event).indexOf('SimulateInfiniteLoop') > 0) return;
 			var text = 'Exception thrown: ' + event;
-			text = text.replace(/&/g, "&amp;");
-			text = text.replace(/</g, "&lt;");
-			text = text.replace(/>/g, "&gt;");
-			text = text.replace('\n', '<br>', 'g');
+			text = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace('\n', '<br>', 'g');
 			Module.setStatus(text);
 			Module.print('Exception thrown: ' + event);
 		};
 
 		function haltRun() {}
-
 		var savedRun;
 
 		function radioChecked(id) {
@@ -484,9 +417,8 @@
 			if (!e) return;
 			e.style.display = show ? 'block' : 'none';
 		}
+
 		Module.setStatus('Downloading...');
-
-
 
 		function startXash() {
 			showElement('loader1', false);
@@ -495,6 +427,7 @@
 			setupFS();
 			Module.arguments = document.getElementById('iArgs').value.split(' ');
 			Module.run = run = savedRun;
+
 			if (radioChecked('Zip')) {
 				const zipper = document.getElementById('selectZip');
 				if (zipMods.length > 1) {
@@ -526,18 +459,15 @@
 
 			window.addEventListener("beforeunload", function(e) {
 				var confirmationMessage = 'Leave the game?';
-
-				(e || window.event).returnValue = confirmationMessage; //Gecko + IE
-				return confirmationMessage; //Gecko + Webkit, Safari, Chrome etc.
+				(e || window.event).returnValue = confirmationMessage;
+				return confirmationMessage;
 			});
 		}
 
 		function mountZIP(data) {
 			var Buffer = BrowserFS.BFSRequire('buffer').Buffer;
 			mfs.mount('/zip', new BrowserFS.FileSystem.ZipFS(Buffer.from(data)));
-			FS.mount(new BrowserFS.EmscriptenFS(), {
-				root: '/zip'
-			}, '/rodir');
+			FS.mount(new BrowserFS.EmscriptenFS(), { root: '/zip' }, '/rodir');
 		}
 
 		function fetchZIP(packageName, cb, parts = 0, size_of_parts = 0, total_size = 0) {
@@ -547,24 +477,11 @@
 				xhr.responseType = 'arraybuffer';
 
 				xhr.onprogress = function(event) {
-					var url = packageName;
-					var size;
-					if (event.total) size = event.total;
-					else size = zipMods[document.getElementById('selectZip').selectedIndex][2];
-					if (event.loaded) {
-						var total = size;
-						var loaded = event.loaded;
-						var num = 0;
-						if (Module['setStatus']) Module['setStatus']('Downloading data...');
-					} else if (!Module.dataFileDownloads) {
-						if (Module['setStatus']) Module['setStatus']('Downloading data...');
-					}
+					if (Module['setStatus']) Module['setStatus']('Downloading data...');
 				};
-				xhr.onerror = function(event) {
-					throw new Error("NetworkError");
-				}
+				xhr.onerror = function(event) { throw new Error("NetworkError"); }
 				xhr.onload = function(event) {
-					if (xhr.status == 200 || xhr.status == 304 || xhr.status == 206 || (xhr.status == 0 && xhr.response)) { // file URLs can return 0
+					if (xhr.status == 200 || xhr.status == 304 || xhr.status == 206 || (xhr.status == 0 && xhr.response)) {
 						mountZIP(xhr.response);
 						cb();
 					} else {
@@ -585,18 +502,11 @@
 					xhr.responseType = 'arraybuffer';
 
 					xhr.onprogress = function(event) {
-						if (event.loaded) {
-							var loaded = event.loaded;
-							if (Module['setStatus']) Module['setStatus']('Downloading data... (' + ((finished * size_of_parts) + loaded) + '/' + total_size + ')');
-						} else if (!Module.dataFileDownloads) {
-							if (Module['setStatus']) Module['setStatus']('Downloading data...');
-						}
+						if (Module['setStatus']) Module['setStatus']('Downloading data...');
 					};
-					xhr.onerror = function(event) {
-						throw new Error("NetworkError");
-					}
+					xhr.onerror = function(event) { throw new Error("NetworkError"); }
 					xhr.onload = function(event) {
-						if (xhr.status == 200 || xhr.status == 304 || xhr.status == 206 || (xhr.status == 0 && xhr.response)) { // file URLs can return 0
+						if (xhr.status == 200 || xhr.status == 304 || xhr.status == 206 || (xhr.status == 0 && xhr.response)) {
 							finished++;
 							buffers.set(new Uint8Array(xhr.response), cur * size_of_parts);
 							if (finished == parts) {
@@ -633,9 +543,7 @@
 
 			if (radioChecked('LocalStorage') && mfs) {
 				mfs.mount('/ls', new BrowserFS.FileSystem.LocalStorage());
-				FS.mount(new BrowserFS.EmscriptenFS(), {
-					root: '/ls'
-				}, '/xash');
+				FS.mount(new BrowserFS.EmscriptenFS(), { root: '/ls' }, '/xash');
 				Module.print('LocalStorage mounted');
 			}
 
@@ -663,9 +571,7 @@
 				var script = document.createElement('script');
 				script.onload = function() {
 					moduleCount++;
-					if (moduleCount == 3) {
-						Module.setStatus("Scripts downloaded!");
-					}
+					if (moduleCount == 3) Module.setStatus("Scripts downloaded!");
 				};
 				document.body.appendChild(script);
 				script.src = name + ".js";
@@ -678,12 +584,13 @@
 
 		Module.preInit = [skipRun];
 		Module.websocket = [];
-		//Module.websocket.url = 'wsproxy://the-swank.pp.ua:3000/'
 		Module.websocket.url = 'wsproxy://4.tcp.ngrok.io:10657/';
 		ENV = [];
-        window.addEventListener('load', function(event) {
-            startXash()
-        });
+
+		window.addEventListener('load', function(event) {
+			fitCanvasToWindow();   // FULLSCREEN
+			startXash();
+		});
 	</script>
 
 	<script>
@@ -712,6 +619,5 @@
 		});
 		document.getElementById('label_show_console_log').style.display = "inline-block";
 	</script>
-
 </body>
 </html>
