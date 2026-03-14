@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zgadnij kto to</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@600;700;800&display=swap" rel="stylesheet">
+
+<style>
+
+:root {
+  --bg: #0d1117;
+  --surface: #161b22;
+  --surface2: #1c2230;
+  --border: #2a313d;
+  --border-hover: #3d4d63;
+  --text: #f0f2f5;
+  --muted: #7d8fa6;
+  --green: #22c55e;
+  --greenBg: rgba(34, 197, 94, .10);
+  --greenBorder: rgba(34, 197, 94, .45);
+  --radius: 16px;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Inter", system-ui, sans-serif;
+}
+
+.page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.app {
+  width: 100%;
+  max-width: 1200px;
+}
+
+.hidden { display: none !important; }
+
+/* ── START ── */
+
+.start-screen { text-align: center; }
+
+.start-screen h1 {
+  font-size: 42px;
+  font-weight: 800;
+  margin: 0 0 8px;
+  letter-spacing: -1px;
+}
+
+.start-screen p {
+  color: var(--muted);
+  font-size: 15px;
+  margin: 0 0 32px;
+}
+
+.size-buttons {
+  display: grid;
+  gap: 10px;
+  max-width: 240px;
+  margin: auto;
+}
+
+.size-btn {
+  padding: 14px 16px;
+  font-size: 16px;
+  font-weight: 700;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--text);
+  cursor: pointer;
+  transition: background .15s, border-color .15s, transform .1s;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.size-btn .count { color: var(--muted); font-size: 13px; font-weight: 600; }
+
+.size-btn:hover {
+  background: #232c3a;
+  border-color: var(--border-hover);
+  transform: translateY(-1px);
+}
+
+/* ── TOOLBAR ── */
+
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 10px 12px;
+}
+
+.toolbar-left,
+.toolbar-right {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.btn {
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 700;
+  border-radius: 9px;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--text);
+  cursor: pointer;
+  transition: background .15s, border-color .15s;
+}
+
+.btn:hover {
+  background: #232c3a;
+  border-color: var(--border-hover);
+}
+
+.badge {
+  padding: 7px 12px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.badge strong { color: var(--text); }
+
+/* ── BOARD ── */
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
+  gap: 14px;
+}
+
+.card {
+  padding: 10px 10px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: border-color .15s, background .15s, opacity .2s, filter .2s, transform .12s;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.card:hover {
+  border-color: var(--border-hover);
+  transform: translateY(-2px);
+}
+
+.card:active { transform: translateY(0); }
+
+.avatar {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #11161d;
+}
+
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  image-rendering: pixelated;
+  filter: contrast(.92) blur(.45px);
+  -webkit-user-drag: none;
+  user-drag: none;
+  pointer-events: none;
+}
+
+.name {
+  margin-top: 9px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.selected {
+  border-color: var(--greenBorder);
+  background: var(--greenBg);
+  box-shadow: 0 0 0 1px var(--greenBorder);
+}
+
+.selected .name { color: var(--green); }
+
+.eliminated {
+  opacity: .2;
+  filter: grayscale(100%);
+  transform: none !important;
+}
+
+.selected.eliminated {
+  opacity: 1;
+  filter: none;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="page">
+<div class="app">
+
+  <!-- START SCREEN -->
+  <section id="startScreen" class="start-screen">
+    <h1>Zgadnij kto to</h1>
+    <p>Wybierz rozmiar planszy i zacznij grę</p>
+    <div class="size-buttons">
+      <button class="size-btn" onclick="startGame(15)">Mała plansza <span class="count">15</span></button>
+      <button class="size-btn" onclick="startGame(25)">Średnia plansza <span class="count">25</span></button>
+      <button class="size-btn" onclick="startGame(35)">Duża plansza <span class="count">35</span></button>
+      <button class="size-btn" onclick="startGame(50)">Bardzo duża <span class="count">50</span></button>
+      <button class="size-btn" onclick="startGame(100)">Maksymalna <span class="count">100</span></button>
+    </div>
+  </section>
+
+  <!-- GAME SCREEN -->
+  <section id="gameScreen" class="hidden">
+    <div class="toolbar">
+      <div class="toolbar-left">
+        <button class="btn" onclick="restart()">Nowa gra</button>
+        <button class="btn" onclick="resetBoard()">Reset planszy</button>
+        <button class="btn" onclick="toggleHide()">Ukryj swój wybór</button>
+      </div>
+      <div class="toolbar-right">
+        <div class="badge">Postaci: <strong id="countLabel">0</strong></div>
+        <div class="badge" id="phaseText">Wybierz swoją postać</div>
+      </div>
+    </div>
+    <div id="board" class="board"></div>
+  </section>
+
+</div>
+</div>
+
+<script>
+
+// ── DOM refs ──────────────────────────────────────────────────────────────────
+
+const startScreen = document.getElementById("startScreen");
+const gameScreen  = document.getElementById("gameScreen");
+const board       = document.getElementById("board");
+const phaseText   = document.getElementById("phaseText");
+const countLabel  = document.getElementById("countLabel");
+
+// ── State ─────────────────────────────────────────────────────────────────────
+
+let phase           = "pick";   // "pick" | "play"
+let myCharacterId   = null;
+let characters      = [];
+let hiddenSelection = false;
+
+// ── Name pool (100 unique names) ──────────────────────────────────────────────
+// BUGFIX: oryginalna pula miała tylko 40 nazw — nie wystarczało dla trybu 100
+
+const NAMES = [
+  "Adam","Bartek","Cezary","Darek","Emil","Filip","Grzegorz","Hubert","Igor","Jacek",
+  "Kamil","Leszek","Marek","Norbert","Oskar","Patryk","Rafał","Sławek","Tomek","Urszula",
+  "Wiktor","Xawery","Zbyszek","Arek","Bogdan","Czesław","Dawid","Eryk","Franek","Gustaw",
+  "Henryk","Ireneusz","Jurek","Karol","Lucjan","Mirek","Nikodem","Olek","Piotrek","Radek",
+  "Stefan","Tadeusz","Walek","Zygmunt","Andrzej","Benedykt","Cyryl","Dominik","Edward","Florian",
+  "Anna","Beata","Celina","Dorota","Ela","Fatima","Grażyna","Hania","Iza","Joanna",
+  "Kasia","Laura","Magda","Natalia","Ola","Paulina","Roma","Sara","Teresa","Ulrika",
+  "Wanda","Zofia","Agata","Basia","Cecylia","Diana","Ewa","Franciszka","Gosia","Helena",
+  "Irena","Jola","Kinga","Lidia","Marta","Nina","Ofelia","Patrycja","Renata","Sylwia",
+  "Agnieszka","Bożena","Daria","Edyta","Gabriela","Halina","Iwona","Justyna","Klaudia","Łukasz"
+];
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function avatarUrl(seed) {
+  const params = new URLSearchParams({
+    seed,
+    size: "64",
+    backgroundType: "solid",
+    accessoriesProbability: "50",
+    glassesProbability: "50",
+    facialHairProbability: "50",
+    topProbability: "100",
+    clothingProbability: "100",
+  });
+  return `https://api.dicebear.com/9.x/avataaars/svg?${params}`;
+}
+
+function buildCharacters(count) {
+  // Deduplicate pool first, then clamp to available size
+  const uniqueNames = [...new Set(NAMES)];
+  const safeCount = Math.min(count, uniqueNames.length);
+  return shuffle(uniqueNames).slice(0, safeCount).map(name => {
+    const seed = `${name}-${Math.random().toString(36).slice(2, 9)}`;
+    return { id: seed, name, img: avatarUrl(seed) };
+  });
+}
+
+// ── UI helpers ────────────────────────────────────────────────────────────────
+
+function setPhase(newPhase, label) {
+  phase = newPhase;
+  phaseText.textContent = label;
+}
+
+function updateCount() {
+  const remaining = board.querySelectorAll(".card:not(.eliminated)").length;
+  countLabel.textContent = remaining;
+}
+
+function getSelectedCard() {
+  return myCharacterId
+    ? board.querySelector(`[data-id="${CSS.escape(myCharacterId)}"]`)
+    : null;
+}
+
+// ── Render ────────────────────────────────────────────────────────────────────
+
+function renderBoard() {
+  board.innerHTML = "";
+
+  const fragment = document.createDocumentFragment();
+
+  characters.forEach(char => {
+    const card = document.createElement("div");
+    card.className = "card";
+    card.dataset.id = char.id;
+
+    // Use loading="lazy" to avoid spamming 100 simultaneous requests
+    card.innerHTML = `
+      <div class="avatar">
+        <img src="${char.img}" alt="${char.name}" loading="lazy">
+      </div>
+      <div class="name">${char.name}</div>
+    `;
+
+    card.addEventListener("click", () => clickCharacter(card, char));
+    fragment.appendChild(card);
+  });
+
+  board.appendChild(fragment);
+  updateCount();
+}
+
+// ── Game logic ────────────────────────────────────────────────────────────────
+
+function clickCharacter(card, char) {
+  if (phase === "pick") {
+    myCharacterId = char.id;
+
+    board.querySelectorAll(".card.selected").forEach(c => c.classList.remove("selected"));
+
+    if (!hiddenSelection) {
+      card.classList.add("selected");
+    }
+
+    setPhase("play", "Odrzucaj niepasujące postacie");
+    return;
+  }
+
+  if (phase === "play") {
+    // BUGFIX: oryginalnie brak early-return blokował kliknięcie swojej postaci
+    if (char.id === myCharacterId) return;
+
+    card.classList.toggle("eliminated");
+    updateCount();
+  }
+}
+
+// BUGFIX: oryginalna wersja nie sprawdzała fazy — można było wywołać
+// toggleHide bez wybranej postaci, co powodowało błąd null.classList
+function toggleHide() {
+  if (phase !== "play" || !myCharacterId) return;
+
+  hiddenSelection = !hiddenSelection;
+
+  const selected = getSelectedCard();
+  if (selected) {
+    selected.classList.toggle("selected", !hiddenSelection);
+  }
+}
+
+// ── Screen transitions ────────────────────────────────────────────────────────
+
+function startGame(count) {
+  characters      = buildCharacters(count);
+  myCharacterId   = null;
+  hiddenSelection = false;
+
+  setPhase("pick", "Wybierz swoją postać");
+
+  startScreen.classList.add("hidden");
+  gameScreen.classList.remove("hidden");
+
+  renderBoard();
+}
+
+function resetBoard() {
+  myCharacterId   = null;
+  hiddenSelection = false;
+
+  setPhase("pick", "Wybierz swoją postać");
+
+  board.querySelectorAll(".card").forEach(card => {
+    card.classList.remove("selected", "eliminated");
+  });
+
+  updateCount();
+}
+
+function restart() {
+  startScreen.classList.remove("hidden");
+  gameScreen.classList.add("hidden");
+}
+
+</script>
+
+</body>
+</html>
