@@ -1,234 +1,56 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Zgadnij kto to</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@600;700;800&display=swap" rel="stylesheet">
-
 <style>
-
 :root {
-  --bg: #0d1117;
-  --surface: #161b22;
-  --surface2: #1c2230;
-  --border: #2a313d;
-  --border-hover: #3d4d63;
-  --text: #f0f2f5;
-  --muted: #7d8fa6;
-  --green: #22c55e;
-  --greenBg: rgba(34, 197, 94, .10);
-  --greenBorder: rgba(34, 197, 94, .45);
+  --bg: #0d1117; --surface: #161b22; --surface2: #1c2230;
+  --border: #2a313d; --border-hover: #3d4d63; --text: #f0f2f5; --muted: #7d8fa6;
+  --green: #22c55e; --greenBg: rgba(34,197,94,.10); --greenBorder: rgba(34,197,94,.45);
   --radius: 16px;
 }
+*,*::before,*::after{box-sizing:border-box;}
+body{margin:0;background:var(--bg);color:var(--text);font-family:"Inter",system-ui,sans-serif;}
+.page{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
+.app{width:100%;max-width:1200px;}
+.hidden{display:none!important;}
 
-*, *::before, *::after { box-sizing: border-box; }
+.start-screen{text-align:center;}
+.start-screen h1{font-size:42px;font-weight:800;margin:0 0 8px;letter-spacing:-1px;}
+.start-screen p{color:var(--muted);font-size:15px;margin:0 0 32px;}
+.size-buttons{display:grid;gap:10px;max-width:240px;margin:auto;}
+.size-btn{padding:14px 16px;font-size:16px;font-weight:700;border-radius:12px;border:1px solid var(--border);background:var(--surface2);color:var(--text);cursor:pointer;transition:background .15s,border-color .15s,transform .1s;display:flex;align-items:center;justify-content:space-between;}
+.size-btn .count{color:var(--muted);font-size:13px;font-weight:600;}
+.size-btn:hover{background:#232c3a;border-color:var(--border-hover);transform:translateY(-1px);}
 
-body {
-  margin: 0;
-  background: var(--bg);
-  color: var(--text);
-  font-family: "Inter", system-ui, sans-serif;
-}
+.toolbar{display:flex;justify-content:space-between;gap:10px;margin-bottom:20px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:10px 12px;}
+.toolbar-left,.toolbar-right{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.btn{padding:8px 14px;font-size:13px;font-weight:700;border-radius:9px;border:1px solid var(--border);background:var(--surface2);color:var(--text);cursor:pointer;transition:background .15s,border-color .15s;}
+.btn:hover{background:#232c3a;border-color:var(--border-hover);}
+.btn-reveal{border-color:var(--greenBorder);color:var(--green);}
+.btn-reveal:hover{background:var(--greenBg);border-color:var(--green);}
+.badge{padding:7px 12px;background:transparent;border:1px solid var(--border);border-radius:9px;font-size:13px;font-weight:700;color:var(--muted);}
+.badge strong{color:var(--text);}
 
-.page {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-}
+.board{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:14px;}
+.card{padding:10px 10px 12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;transition:border-color .15s,background .15s,opacity .2s,filter .2s,transform .12s;-webkit-user-select:none;user-select:none;}
+.card:hover{border-color:var(--border-hover);transform:translateY(-2px);}
+.card:active{transform:translateY(0);}
+.avatar{width:100%;aspect-ratio:1/1;border-radius:10px;overflow:hidden;background:#11161d;}
+.avatar img{width:100%;height:100%;object-fit:cover;image-rendering:pixelated;filter:contrast(.92) blur(.45px);-webkit-user-drag:none;user-drag:none;pointer-events:none;}
+.name{margin-top:9px;text-align:center;font-size:13px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 
-.app {
-  width: 100%;
-  max-width: 1200px;
-}
-
-.hidden { display: none !important; }
-
-/* ── START ── */
-
-.start-screen { text-align: center; }
-
-.start-screen h1 {
-  font-size: 42px;
-  font-weight: 800;
-  margin: 0 0 8px;
-  letter-spacing: -1px;
-}
-
-.start-screen p {
-  color: var(--muted);
-  font-size: 15px;
-  margin: 0 0 32px;
-}
-
-.size-buttons {
-  display: grid;
-  gap: 10px;
-  max-width: 240px;
-  margin: auto;
-}
-
-.size-btn {
-  padding: 14px 16px;
-  font-size: 16px;
-  font-weight: 700;
-  border-radius: 12px;
-  border: 1px solid var(--border);
-  background: var(--surface2);
-  color: var(--text);
-  cursor: pointer;
-  transition: background .15s, border-color .15s, transform .1s;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.size-btn .count { color: var(--muted); font-size: 13px; font-weight: 600; }
-
-.size-btn:hover {
-  background: #232c3a;
-  border-color: var(--border-hover);
-  transform: translateY(-1px);
-}
-
-/* ── TOOLBAR ── */
-
-.toolbar {
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
-  margin-bottom: 20px;
-  flex-wrap: wrap;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 10px 12px;
-}
-
-.toolbar-left,
-.toolbar-right {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  align-items: center;
-}
-
-.btn {
-  padding: 8px 14px;
-  font-size: 13px;
-  font-weight: 700;
-  border-radius: 9px;
-  border: 1px solid var(--border);
-  background: var(--surface2);
-  color: var(--text);
-  cursor: pointer;
-  transition: background .15s, border-color .15s;
-}
-
-.btn:hover {
-  background: #232c3a;
-  border-color: var(--border-hover);
-}
-
-.badge {
-  padding: 7px 12px;
-  background: transparent;
-  border: 1px solid var(--border);
-  border-radius: 9px;
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--muted);
-}
-
-.badge strong { color: var(--text); }
-
-/* ── BOARD ── */
-
-.board {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
-  gap: 14px;
-}
-
-.card {
-  padding: 10px 10px 12px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  cursor: pointer;
-  transition: border-color .15s, background .15s, opacity .2s, filter .2s, transform .12s;
-  -webkit-user-select: none;
-  user-select: none;
-}
-
-.card:hover {
-  border-color: var(--border-hover);
-  transform: translateY(-2px);
-}
-
-.card:active { transform: translateY(0); }
-
-.avatar {
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  border-radius: 10px;
-  overflow: hidden;
-  background: #11161d;
-}
-
-.avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  image-rendering: pixelated;
-  filter: contrast(.92) blur(.45px);
-  -webkit-user-drag: none;
-  user-drag: none;
-  pointer-events: none;
-}
-
-.name {
-  margin-top: 9px;
-  text-align: center;
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--text);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.selected {
-  border-color: var(--greenBorder);
-  background: var(--greenBg);
-  box-shadow: 0 0 0 1px var(--greenBorder);
-}
-
-.selected .name { color: var(--green); }
-
-.eliminated {
-  opacity: .2;
-  filter: grayscale(100%);
-  transform: none !important;
-}
-
-.selected.eliminated {
-  opacity: 1;
-  filter: none;
-}
-
+.card.flash-reveal{border-color:var(--greenBorder);background:var(--greenBg);box-shadow:0 0 0 2px var(--green);}
+.card.flash-reveal .name{color:var(--green);}
+.eliminated{opacity:.2;filter:grayscale(100%);transform:none!important;}
 </style>
 </head>
-
 <body>
+<div class="page"><div class="app">
 
-<div class="page">
-<div class="app">
-
-  <!-- START SCREEN -->
   <section id="startScreen" class="start-screen">
     <h1>Zgadnij kto to</h1>
     <p>Wybierz rozmiar planszy i zacznij grę</p>
@@ -241,13 +63,12 @@ body {
     </div>
   </section>
 
-  <!-- GAME SCREEN -->
   <section id="gameScreen" class="hidden">
     <div class="toolbar">
       <div class="toolbar-left">
         <button class="btn" onclick="restart()">Nowa gra</button>
         <button class="btn" onclick="resetBoard()">Reset planszy</button>
-        <button class="btn" onclick="toggleHide()">Ukryj swój wybór</button>
+        <button class="btn btn-reveal hidden" id="revealBtn" onclick="revealMyCard()">Pokaż moją postać</button>
       </div>
       <div class="toolbar-right">
         <div class="badge">Postaci: <strong id="countLabel">0</strong></div>
@@ -257,28 +78,21 @@ body {
     <div id="board" class="board"></div>
   </section>
 
-</div>
-</div>
+</div></div>
 
 <script>
-
-// ── DOM refs ──────────────────────────────────────────────────────────────────
-
 const startScreen = document.getElementById("startScreen");
 const gameScreen  = document.getElementById("gameScreen");
 const board       = document.getElementById("board");
 const phaseText   = document.getElementById("phaseText");
 const countLabel  = document.getElementById("countLabel");
+const revealBtn   = document.getElementById("revealBtn");
 
-// ── State ─────────────────────────────────────────────────────────────────────
-
-let phase           = "pick";   // "pick" | "play"
-let myCharacterId   = null;
-let characters      = [];
-let hiddenSelection = false;
-
-// ── Name pool (100 unique names) ──────────────────────────────────────────────
-// BUGFIX: oryginalna pula miała tylko 40 nazw — nie wystarczało dla trybu 100
+let phase         = "pick";
+let myCharacterId = null;
+let characters    = [];
+let flashTimer    = null;
+let reElimTimer   = null;
 
 const NAMES = [
   "Adam","Bartek","Cezary","Darek","Emil","Filip","Grzegorz","Hubert","Igor","Jacek",
@@ -293,159 +107,132 @@ const NAMES = [
   "Agnieszka","Bożena","Daria","Edyta","Gabriela","Halina","Iwona","Justyna","Klaudia","Łukasz"
 ];
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
-
 function shuffle(arr) {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
+  const a=[...arr];
+  for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
   return a;
 }
 
 function avatarUrl(seed) {
-  const params = new URLSearchParams({
-    seed,
-    size: "64",
-    backgroundType: "solid",
-    accessoriesProbability: "50",
-    glassesProbability: "50",
-    facialHairProbability: "50",
-    topProbability: "100",
-    clothingProbability: "100",
-  });
-  return `https://api.dicebear.com/9.x/avataaars/svg?${params}`;
+  const p=new URLSearchParams({seed,size:"64",backgroundType:"solid",accessoriesProbability:"50",glassesProbability:"50",facialHairProbability:"50",topProbability:"100",clothingProbability:"100"});
+  return `https://api.dicebear.com/9.x/avataaars/svg?${p}`;
 }
 
 function buildCharacters(count) {
-  // Deduplicate pool first, then clamp to available size
-  const uniqueNames = [...new Set(NAMES)];
-  const safeCount = Math.min(count, uniqueNames.length);
-  return shuffle(uniqueNames).slice(0, safeCount).map(name => {
-    const seed = `${name}-${Math.random().toString(36).slice(2, 9)}`;
-    return { id: seed, name, img: avatarUrl(seed) };
+  const u=[...new Set(NAMES)];
+  return shuffle(u).slice(0,Math.min(count,u.length)).map(name=>{
+    const seed=`${name}-${Math.random().toString(36).slice(2,9)}`;
+    return {id:seed,name,img:avatarUrl(seed)};
   });
 }
 
-// ── UI helpers ────────────────────────────────────────────────────────────────
+function setPhase(p,label){phase=p;phaseText.textContent=label;}
 
-function setPhase(newPhase, label) {
-  phase = newPhase;
-  phaseText.textContent = label;
+function updateCount(){
+  countLabel.textContent=board.querySelectorAll(".card:not(.eliminated)").length;
 }
 
-function updateCount() {
-  const remaining = board.querySelectorAll(".card:not(.eliminated)").length;
-  countLabel.textContent = remaining;
+function getMyCard(){
+  return myCharacterId ? board.querySelector(`[data-id="${CSS.escape(myCharacterId)}"]`) : null;
 }
 
-function getSelectedCard() {
-  return myCharacterId
-    ? board.querySelector(`[data-id="${CSS.escape(myCharacterId)}"]`)
-    : null;
-}
+function revealMyCard() {
+  const card = getMyCard();
+  if (!card) return;
 
-// ── Render ────────────────────────────────────────────────────────────────────
+  // anuluj poprzednie timery
+  if (flashTimer) clearTimeout(flashTimer);
+  if (reElimTimer) clearTimeout(reElimTimer);
+
+  const wasEliminated = card.classList.contains("eliminated");
+
+  // tymczasowo przywróć jeśli odrzucona
+  if (wasEliminated) {
+    card.classList.remove("eliminated");
+    updateCount();
+  }
+
+  card.scrollIntoView({behavior:"smooth",block:"center"});
+  card.classList.add("flash-reveal");
+
+  flashTimer = setTimeout(() => {
+    card.classList.remove("flash-reveal");
+  }, 1400);
+
+  // jeśli była odrzucona — z powrotem odrzuć po zakończeniu podświetlenia
+  if (wasEliminated) {
+    reElimTimer = setTimeout(() => {
+      card.classList.add("eliminated");
+      updateCount();
+    }, 1400);
+  }
+}
 
 function renderBoard() {
-  board.innerHTML = "";
-
-  const fragment = document.createDocumentFragment();
-
-  characters.forEach(char => {
-    const card = document.createElement("div");
-    card.className = "card";
-    card.dataset.id = char.id;
-
-    // Use loading="lazy" to avoid spamming 100 simultaneous requests
-    card.innerHTML = `
-      <div class="avatar">
-        <img src="${char.img}" alt="${char.name}" loading="lazy">
-      </div>
-      <div class="name">${char.name}</div>
-    `;
-
-    card.addEventListener("click", () => clickCharacter(card, char));
-    fragment.appendChild(card);
+  board.innerHTML="";
+  const frag=document.createDocumentFragment();
+  characters.forEach(char=>{
+    const card=document.createElement("div");
+    card.className="card";
+    card.dataset.id=char.id;
+    card.innerHTML=`<div class="avatar"><img src="${char.img}" alt="${char.name}" loading="lazy"></div><div class="name">${char.name}</div>`;
+    card.addEventListener("click",()=>clickCharacter(card,char));
+    frag.appendChild(card);
   });
-
-  board.appendChild(fragment);
+  board.appendChild(frag);
   updateCount();
 }
 
-// ── Game logic ────────────────────────────────────────────────────────────────
-
-function clickCharacter(card, char) {
-  if (phase === "pick") {
-    myCharacterId = char.id;
-
-    board.querySelectorAll(".card.selected").forEach(c => c.classList.remove("selected"));
-
-    if (!hiddenSelection) {
-      card.classList.add("selected");
-    }
-
-    setPhase("play", "Odrzucaj postacie");
+function clickCharacter(card,char) {
+  if (phase==="pick") {
+    myCharacterId=char.id;
+    setPhase("play","Odrzucaj postacie");
+    revealBtn.classList.remove("hidden");
+    if (flashTimer) clearTimeout(flashTimer);
+    card.classList.add("flash-reveal");
+    flashTimer=setTimeout(()=>card.classList.remove("flash-reveal"),1400);
     return;
   }
-
-  if (phase === "play") {
-    // BUGFIX: oryginalnie brak early-return blokował kliknięcie swojej postaci
-    if (char.id === myCharacterId) return;
-
+  if (phase==="play") {
+    // jeśli to nasza postać i mamy aktywny timer re-eliminacji — anuluj go
+    if (char.id===myCharacterId && reElimTimer) {
+      clearTimeout(reElimTimer);
+      reElimTimer=null;
+    }
     card.classList.toggle("eliminated");
     updateCount();
   }
 }
 
-// BUGFIX: oryginalna wersja nie sprawdzała fazy — można było wywołać
-// toggleHide bez wybranej postaci, co powodowało błąd null.classList
-function toggleHide() {
-  if (phase !== "play" || !myCharacterId) return;
-
-  hiddenSelection = !hiddenSelection;
-
-  const selected = getSelectedCard();
-  if (selected) {
-    selected.classList.toggle("selected", !hiddenSelection);
-  }
-}
-
-// ── Screen transitions ────────────────────────────────────────────────────────
-
 function startGame(count) {
-  characters      = buildCharacters(count);
-  myCharacterId   = null;
-  hiddenSelection = false;
-
-  setPhase("pick", "Wybierz swoją postać");
-
+  characters=buildCharacters(count);
+  myCharacterId=null;
+  if(flashTimer)clearTimeout(flashTimer);
+  if(reElimTimer)clearTimeout(reElimTimer);
+  revealBtn.classList.add("hidden");
+  setPhase("pick","Wybierz swoją postać");
   startScreen.classList.add("hidden");
   gameScreen.classList.remove("hidden");
-
   renderBoard();
 }
 
 function resetBoard() {
-  myCharacterId   = null;
-  hiddenSelection = false;
-
-  setPhase("pick", "Wybierz swoją postać");
-
-  board.querySelectorAll(".card").forEach(card => {
-    card.classList.remove("selected", "eliminated");
-  });
-
+  myCharacterId=null;
+  if(flashTimer)clearTimeout(flashTimer);
+  if(reElimTimer)clearTimeout(reElimTimer);
+  revealBtn.classList.add("hidden");
+  setPhase("pick","Wybierz swoją postać");
+  board.querySelectorAll(".card").forEach(c=>c.classList.remove("eliminated","flash-reveal"));
   updateCount();
 }
 
 function restart() {
+  if(flashTimer)clearTimeout(flashTimer);
+  if(reElimTimer)clearTimeout(reElimTimer);
+  revealBtn.classList.add("hidden");
   startScreen.classList.remove("hidden");
   gameScreen.classList.add("hidden");
 }
-
 </script>
-
 </body>
 </html>
