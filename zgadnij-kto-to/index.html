@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zgadnij kto to</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0d1117; --surface: #161b22; --surface2: #1c2230;
+  --border: #2a313d; --border-hover: #3d4d63; --text: #f0f2f5; --muted: #7d8fa6;
+  --green: #22c55e; --greenBg: rgba(34,197,94,.10); --greenBorder: rgba(34,197,94,.45);
+  --radius: 16px;
+}
+*,*::before,*::after{box-sizing:border-box;}
+body{margin:0;background:var(--bg);color:var(--text);font-family:"Inter",system-ui,sans-serif;}
+.page{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
+.app{width:100%;max-width:1200px;}
+.hidden{display:none!important;}
+
+.start-screen{text-align:center;}
+.start-screen h1{font-size:42px;font-weight:800;margin:0 0 8px;letter-spacing:-1px;}
+.start-screen p{color:var(--muted);font-size:15px;margin:0 0 32px;}
+.size-buttons{display:grid;gap:10px;max-width:240px;margin:auto;}
+.size-btn{padding:14px 16px;font-size:16px;font-weight:700;border-radius:12px;border:1px solid var(--border);background:var(--surface2);color:var(--text);cursor:pointer;transition:background .15s,border-color .15s,transform .1s;display:flex;align-items:center;justify-content:space-between;}
+.size-btn .count{color:var(--muted);font-size:13px;font-weight:600;}
+.size-btn:hover{background:#232c3a;border-color:var(--border-hover);transform:translateY(-1px);}
+
+.toolbar{display:flex;justify-content:space-between;gap:10px;margin-bottom:20px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:10px 12px;}
+.toolbar-left,.toolbar-right{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.btn{padding:8px 14px;font-size:13px;font-weight:700;border-radius:9px;border:1px solid var(--border);background:var(--surface2);color:var(--text);cursor:pointer;transition:background .15s,border-color .15s;}
+.btn:hover{background:#232c3a;border-color:var(--border-hover);}
+.btn-reveal{border-color:var(--greenBorder);color:var(--green);}
+.btn-reveal:hover{background:var(--greenBg);border-color:var(--green);}
+.badge{padding:7px 12px;background:transparent;border:1px solid var(--border);border-radius:9px;font-size:13px;font-weight:700;color:var(--muted);}
+.badge strong{color:var(--text);}
+
+.board{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:14px;}
+.card{padding:10px 10px 12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;transition:border-color .15s,background .15s,opacity .2s,filter .2s,transform .12s;-webkit-user-select:none;user-select:none;}
+.card:hover{border-color:var(--border-hover);transform:translateY(-2px);}
+.card:active{transform:translateY(0);}
+.avatar{width:100%;aspect-ratio:1/1;border-radius:10px;overflow:hidden;background:#11161d;}
+.avatar img{width:100%;height:100%;object-fit:cover;image-rendering:pixelated;filter:contrast(.92) blur(.45px);-webkit-user-drag:none;user-drag:none;pointer-events:none;}
+.name{margin-top:9px;text-align:center;font-size:13px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+.card.flash-reveal{border-color:var(--greenBorder);background:var(--greenBg);box-shadow:0 0 0 2px var(--green);}
+.card.flash-reveal .name{color:var(--green);}
+.eliminated{opacity:.2;filter:grayscale(100%);transform:none!important;}
+</style>
+</head>
+<body>
+<div class="page"><div class="app">
+
+  <section id="startScreen" class="start-screen">
+    <h1>Zgadnij kto to</h1>
+    <p>Wybierz rozmiar planszy i zacznij grę</p>
+    <div class="size-buttons">
+      <button class="size-btn" onclick="startGame(15)">Mała plansza <span class="count">15</span></button>
+      <button class="size-btn" onclick="startGame(25)">Średnia plansza <span class="count">25</span></button>
+      <button class="size-btn" onclick="startGame(35)">Duża plansza <span class="count">35</span></button>
+      <button class="size-btn" onclick="startGame(50)">Bardzo duża <span class="count">50</span></button>
+      <button class="size-btn" onclick="startGame(100)">Maksymalna <span class="count">100</span></button>
+    </div>
+  </section>
+
+  <section id="gameScreen" class="hidden">
+    <div class="toolbar">
+      <div class="toolbar-left">
+        <button class="btn" onclick="restart()">Nowa gra</button>
+        <button class="btn" onclick="resetBoard()">Reset planszy</button>
+        <button class="btn btn-reveal hidden" id="revealBtn" onclick="revealMyCard()">Pokaż moją postać</button>
+      </div>
+      <div class="toolbar-right">
+        <div class="badge">Postaci: <strong id="countLabel">0</strong></div>
+        <div class="badge" id="phaseText">Wybierz swoją postać</div>
+      </div>
+    </div>
+    <div id="board" class="board"></div>
+  </section>
+
+</div></div>
+
+<script>
+const startScreen = document.getElementById("startScreen");
+const gameScreen  = document.getElementById("gameScreen");
+const board       = document.getElementById("board");
+const phaseText   = document.getElementById("phaseText");
+const countLabel  = document.getElementById("countLabel");
+const revealBtn   = document.getElementById("revealBtn");
+
+let phase         = "pick";
+let myCharacterId = null;
+let characters    = [];
+let flashTimer    = null;
+let reElimTimer   = null;
+
+const NAMES = [
+  "Adam","Bartek","Cezary","Darek","Emil","Filip","Grzegorz","Hubert","Igor","Jacek",
+  "Kamil","Leszek","Marek","Norbert","Oskar","Patryk","Rafał","Sławek","Tomek","Urszula",
+  "Wiktor","Xawery","Zbyszek","Arek","Bogdan","Czesław","Dawid","Eryk","Franek","Gustaw",
+  "Henryk","Ireneusz","Jurek","Karol","Lucjan","Mirek","Nikodem","Olek","Piotrek","Radek",
+  "Stefan","Tadeusz","Walek","Zygmunt","Andrzej","Benedykt","Cyryl","Dominik","Edward","Florian",
+  "Anna","Beata","Celina","Dorota","Ela","Fatima","Grażyna","Hania","Iza","Joanna",
+  "Kasia","Laura","Magda","Natalia","Ola","Paulina","Roma","Sara","Teresa","Ulrika",
+  "Wanda","Zofia","Agata","Basia","Cecylia","Diana","Ewa","Franciszka","Gosia","Helena",
+  "Irena","Jola","Kinga","Lidia","Marta","Nina","Ofelia","Patrycja","Renata","Sylwia",
+  "Agnieszka","Bożena","Daria","Edyta","Gabriela","Halina","Iwona","Justyna","Klaudia","Łukasz"
+];
+
+// Funkcja do pobierania lokalnych SVG
+function avatarUrl(index) {
+  // Zakładamy, że pliki są w folderze "img" i nazwane 1.svg, 2.svg, ... 100.svg
+  return `img/${index}.svg`;
+}
+
+// Budowanie postaci w stałej kolejności
+function buildCharacters(count) {
+  const u = [...new Set(NAMES)]; // unikamy powtórzeń imion
+  const selected = u.slice(0, Math.min(count, u.length));
+  return selected.map((name, i) => {
+    return {
+      id: `char-${i+1}`,
+      name: name,
+      img: avatarUrl(i+1) // przypisujemy grafiki w kolejności 1.svg, 2.svg ...
+    };
+  });
+}
+
+function setPhase(p,label){phase=p;phaseText.textContent=label;}
+
+function updateCount(){
+  countLabel.textContent=board.querySelectorAll(".card:not(.eliminated)").length;
+}
+
+function getMyCard(){
+  return myCharacterId ? board.querySelector(`[data-id="${CSS.escape(myCharacterId)}"]`) : null;
+}
+
+function revealMyCard() {
+  const card = getMyCard();
+  if (!card) return;
+
+  if (flashTimer) clearTimeout(flashTimer);
+  if (reElimTimer) clearTimeout(reElimTimer);
+
+  const wasEliminated = card.classList.contains("eliminated");
+  if (wasEliminated) { card.classList.remove("eliminated"); updateCount(); }
+
+  card.scrollIntoView({behavior:"smooth",block:"center"});
+  card.classList.add("flash-reveal");
+
+  flashTimer = setTimeout(() => { card.classList.remove("flash-reveal"); }, 1400);
+
+  if (wasEliminated) {
+    reElimTimer = setTimeout(() => { card.classList.add("eliminated"); updateCount(); }, 1400);
+  }
+}
+
+function renderBoard() {
+  board.innerHTML="";
+  const frag=document.createDocumentFragment();
+  characters.forEach(char=>{
+    const card=document.createElement("div");
+    card.className="card";
+    card.dataset.id=char.id;
+    card.innerHTML=`<div class="avatar"><img src="${char.img}" alt="${char.name}" loading="lazy"></div><div class="name">${char.name}</div>`;
+    card.addEventListener("click",()=>clickCharacter(card,char));
+    frag.appendChild(card);
+  });
+  board.appendChild(frag);
+  updateCount();
+}
+
+function clickCharacter(card,char) {
+  if (phase==="pick") {
+    myCharacterId=char.id;
+    setPhase("play","Odrzucaj postacie");
+    revealBtn.classList.remove("hidden");
+    if (flashTimer) clearTimeout(flashTimer);
+    card.classList.add("flash-reveal");
+    flashTimer=setTimeout(()=>card.classList.remove("flash-reveal"),1400);
+    return;
+  }
+  if (phase==="play") {
+    if (char.id===myCharacterId && reElimTimer) { clearTimeout(reElimTimer); reElimTimer=null; }
+    card.classList.toggle("eliminated");
+    updateCount();
+  }
+}
+
+function startGame(count) {
+  characters=buildCharacters(count);
+  myCharacterId=null;
+  if(flashTimer)clearTimeout(flashTimer);
+  if(reElimTimer)clearTimeout(reElimTimer);
+  revealBtn.classList.add("hidden");
+  setPhase("pick","Wybierz swoją postać");
+  startScreen.classList.add("hidden");
+  gameScreen.classList.remove("hidden");
+  renderBoard();
+}
+
+function resetBoard() {
+  myCharacterId=null;
+  if(flashTimer)clearTimeout(flashTimer);
+  if(reElimTimer)clearTimeout(reElimTimer);
+  revealBtn.classList.add("hidden");
+  setPhase("pick","Wybierz swoją postać");
+  board.querySelectorAll(".card").forEach(c=>c.classList.remove("eliminated","flash-reveal"));
+  updateCount();
+}
+
+function restart() {
+  if(flashTimer)clearTimeout(flashTimer);
+  if(reElimTimer)clearTimeout(reElimTimer);
+  revealBtn.classList.add("hidden");
+  startScreen.classList.remove("hidden");
+  gameScreen.classList.add("hidden");
+}
+</script>
+</body>
+</html>
