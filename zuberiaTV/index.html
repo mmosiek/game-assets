@@ -13,61 +13,45 @@
 <script src="https://unpkg.com/videojs-mobile-ui/dist/videojs-mobile-ui.min.js"></script>
 <script src="https://unpkg.com/videojs-hls-quality-selector@2.0.0/dist/videojs-hls-quality-selector.min.js"></script>
 <script src="https://unpkg.com/videojs-hotkeys@0.2.30/videojs.hotkeys.min.js"></script>
+
+<!-- WTYCZKA YOUTUBE -->
 <script src="https://unpkg.com/videojs-youtube/dist/Youtube.min.js"></script>
 
-<!-- DASH -->
-<script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
-<script src="https://unpkg.com/videojs-contrib-dash/dist/videojs-dash.min.js"></script>
-
 <style>
-html,body{height:100%;margin:0;background:#000;overflow:hidden}
-.video-js{width:100%!important;height:100%!important}
+html,body{height:100%;margin:0;background:#000;overflow:hidden;font-family:system-ui,Arial,sans-serif}
+.video-js{width:100%!important;height:100%!important;font-size: 100%;}
 </style>
 </head>
 <body>
 
-<video id="player" class="video-js vjs-default-skin" controls playsinline></video>
+<video id="player" class="video-js vjs-default-skin vjs-ui-big" controls preload="auto" playsinline></video>
 
 <script>
-function getStreamFromURL() {
-  const params = new URLSearchParams(window.location.search);
-  return (params.get("url") || "").trim();
-}
+function askForStream() {
+  let url = null;
 
-function detectType(url) {
-  const u = url.toLowerCase();
+  while (!url) {
+    const input = prompt("Wklej link do wideo/streama (m3u8, mp4, mov, webm, audio) lub YouTube:");
 
-  if (u.includes(".m3u8")) return "application/x-mpegURL"; // HLS
-  if (u.includes(".mpd")) return "application/dash+xml";   // DASH
+    const trimmed = (input || "").trim();
 
-  if (/\.(mp4|m4v)(\?|$)/.test(u)) return "video/mp4";
-  if (/\.(webm)(\?|$)/.test(u)) return "video/webm";
-  if (/\.(mov)(\?|$)/.test(u)) return "video/quicktime";
-  if (/\.(mkv)(\?|$)/.test(u)) return "video/x-matroska";
-  if (/\.(avi)(\?|$)/.test(u)) return "video/x-msvideo";
+    const isYouTube =
+      /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)[\w-]{6,}.*$/i.test(trimmed);
 
-  if (/\.(mp3)(\?|$)/.test(u)) return "audio/mpeg";
-  if (/\.(wav)(\?|$)/.test(u)) return "audio/wav";
-  if (/\.(ogg|oga)(\?|$)/.test(u)) return "audio/ogg";
-  if (/\.(aac)(\?|$)/.test(u)) return "audio/aac";
-  if (/\.(m4a)(\?|$)/.test(u)) return "audio/mp4";
+    const isDirectMedia =
+      /^https?:\/\/.+\.(m3u8|mp4|m4v|mov|webm|mp3|m4a|aac|ogg|oga|wav)(\?.*)?$/i.test(trimmed);
 
-  if (/youtube\.com|youtu\.be/.test(u)) return "video/youtube";
-
-  return "video/mp4"; // fallback
-}
-
-const player = videojs("player", {
-  responsive: true,
-  fluid: true,
-  html5: {
-    vhs: {
-      overrideNative: true
-    },
-    nativeAudioTracks: false,
-    nativeVideoTracks: false
+    if (isYouTube || isDirectMedia) {
+      url = trimmed;
+    } else {
+      alert("Nieprawid�owy link. Podaj pe�ny URL do pliku (m3u8/mp4/mov/...) albo link YouTube.");
+    }
   }
-});
+
+  return url;
+}
+
+const player = videojs("player", { responsive: true });
 
 const fit = () => {
   player.width(innerWidth);
@@ -76,25 +60,33 @@ const fit = () => {
 
 player.ready(async () => {
 
-  const url = getStreamFromURL();
+  const streamUrl = askForStream();
 
-  if (!url) {
-    alert("Brak parametru ?url=");
-    return;
-  }
+  const lower = streamUrl.toLowerCase();
+  let type = "";
 
-  const type = detectType(url);
+  if (lower.includes(".m3u8")) type = "application/x-mpegURL";
+  else if (/\.(mp4|m4v)(\?|$)/.test(lower)) type = "video/mp4";
+  else if (/\.(mov)(\?|$)/.test(lower)) type = "video/quicktime";
+  else if (/\.(webm)(\?|$)/.test(lower)) type = "video/webm";
+  else if (/\.(mp3)(\?|$)/.test(lower)) type = "audio/mpeg";
+  else if (/\.(m4a)(\?|$)/.test(lower)) type = "audio/mp4";
+  else if (/\.(aac)(\?|$)/.test(lower)) type = "audio/aac";
+  else if (/\.(ogg|oga)(\?|$)/.test(lower)) type = "audio/ogg";
+  else if (/\.(wav)(\?|$)/.test(lower)) type = "audio/wav";
+  else if (/^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)/i.test(streamUrl)) type = "video/youtube";
 
-  player.src({ src: url, type });
+  player.src({
+    src: streamUrl,
+    type
+  });
 
   fit();
   addEventListener("resize", fit);
+  addEventListener("orientationchange", fit);
 
   player.hlsQualitySelector({ displayCurrentQuality: true });
-  player.hotkeys({
-    volumeStep: 0.1,
-    seekStep: 5
-  });
+  player.hotkeys({ volumeStep: .1, seekStep: 5, enableModifiersForNumbers: false });
 
   try { await player.play(); } catch(e) {}
 });
