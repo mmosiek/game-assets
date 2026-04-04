@@ -14,12 +14,12 @@
 <script src="https://unpkg.com/videojs-hls-quality-selector@2.0.0/dist/videojs-hls-quality-selector.min.js"></script>
 <script src="https://unpkg.com/videojs-hotkeys@0.2.30/videojs.hotkeys.min.js"></script>
 
-<!-- WTYCZKA YOUTUBE -->
+<!-- YOUTUBE -->
 <script src="https://unpkg.com/videojs-youtube/dist/Youtube.min.js"></script>
 
 <style>
 html,body{height:100%;margin:0;background:#000;overflow:hidden;font-family:system-ui,Arial,sans-serif}
-.video-js{width:100%!important;height:100%!important;font-size: 100%;}
+.video-js{width:100%!important;height:100%!important;font-size:100%;}
 </style>
 </head>
 <body>
@@ -27,28 +27,9 @@ html,body{height:100%;margin:0;background:#000;overflow:hidden;font-family:syste
 <video id="player" class="video-js vjs-default-skin vjs-ui-big" controls preload="auto" playsinline></video>
 
 <script>
-function askForStream() {
-  let url = null;
-
-  while (!url) {
-    const input = prompt("Wklej link do wideo/streama (m3u8, mp4, mov, webm, audio) lub YouTube:");
-
-    const trimmed = (input || "").trim();
-
-    const isYouTube =
-      /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)[\w-]{6,}.*$/i.test(trimmed);
-
-    const isDirectMedia =
-      /^https?:\/\/.+\.(m3u8|mp4|m4v|mov|webm|mp3|m4a|aac|ogg|oga|wav)(\?.*)?$/i.test(trimmed);
-
-    if (isYouTube || isDirectMedia) {
-      url = trimmed;
-    } else {
-      alert("Nieprawid³owy link. Podaj pe³ny URL do pliku (m3u8/mp4/mov/...) albo link YouTube.");
-    }
-  }
-
-  return url;
+function getStreamFromURL() {
+  const params = new URLSearchParams(window.location.search);
+  return (params.get("url") || "").trim();
 }
 
 const player = videojs("player", { responsive: true });
@@ -60,7 +41,12 @@ const fit = () => {
 
 player.ready(async () => {
 
-  const streamUrl = askForStream();
+  const streamUrl = getStreamFromURL();
+
+  if (!streamUrl) {
+    alert("Brak parametru ?url=");
+    return;
+  }
 
   const lower = streamUrl.toLowerCase();
   let type = "";
