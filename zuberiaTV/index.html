@@ -32,23 +32,53 @@ function askForStream() {
 
   while (!url) {
     const input = prompt("Wklej link do wideo/streama (m3u8, mp4, mov, webm, audio) lub YouTube:");
-
     const trimmed = (input || "").trim();
 
     const isYouTube =
       /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)[\w-]{6,}.*$/i.test(trimmed);
 
     const isDirectMedia =
-      /^https?:\/\/.+\.(m3u8|mp4|m4v|mov|webm|mp3|m4a|aac|ogg|oga|wav)(\?.*)?$/i.test(trimmed);
+      /^https?:\/\/.+/i.test(trimmed);
 
     if (isYouTube || isDirectMedia) {
       url = trimmed;
     } else {
-      alert("Nieprawid�owy link. Podaj pe�ny URL do pliku (m3u8/mp4/mov/...) albo link YouTube.");
+      alert("Nieprawidłowy link.");
     }
   }
 
   return url;
+}
+
+async function detectType(url) {
+  try {
+    const res = await fetch(url, { method: "HEAD" });
+    const contentType = res.headers.get("content-type") || "";
+
+    if (contentType.includes("application/vnd.apple.mpegurl") || contentType.includes("application/x-mpegURL"))
+      return "application/x-mpegURL";
+
+    if (contentType.includes("video/mp4"))
+      return "video/mp4";
+
+    if (contentType.includes("video/webm"))
+      return "video/webm";
+
+    if (contentType.includes("video/quicktime"))
+      return "video/quicktime";
+
+    if (contentType.includes("audio/"))
+      return contentType;
+
+  } catch (e) {
+    console.warn("HEAD fail:", e);
+  }
+
+  // fallback
+  if (url.includes("m3u8")) return "application/x-mpegURL";
+  if (/youtube\.com|youtu\.be/.test(url)) return "video/youtube";
+
+  return "video/mp4";
 }
 
 const player = videojs("player", { responsive: true });
@@ -62,19 +92,7 @@ player.ready(async () => {
 
   const streamUrl = askForStream();
 
-  const lower = streamUrl.toLowerCase();
-  let type = "";
-
-  if (lower.includes(".m3u8")) type = "application/x-mpegURL";
-  else if (/\.(mp4|m4v)(\?|$)/.test(lower)) type = "video/mp4";
-  else if (/\.(mov)(\?|$)/.test(lower)) type = "video/quicktime";
-  else if (/\.(webm)(\?|$)/.test(lower)) type = "video/webm";
-  else if (/\.(mp3)(\?|$)/.test(lower)) type = "audio/mpeg";
-  else if (/\.(m4a)(\?|$)/.test(lower)) type = "audio/mp4";
-  else if (/\.(aac)(\?|$)/.test(lower)) type = "audio/aac";
-  else if (/\.(ogg|oga)(\?|$)/.test(lower)) type = "audio/ogg";
-  else if (/\.(wav)(\?|$)/.test(lower)) type = "audio/wav";
-  else if (/^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)/i.test(streamUrl)) type = "video/youtube";
+  const type = await detectType(streamUrl);
 
   player.src({
     src: streamUrl,
