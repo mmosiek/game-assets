@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zwał Konia Mobile</title>
+
+<style>
+    body{
+        background:#0f0f0f;
+        color:#fff;
+        font-family:sans-serif;
+        display:flex;
+        flex-direction:column;
+        align-items:center;
+        justify-content:center;
+        min-height:100vh;
+        margin:0;
+        overflow:hidden;
+    }
+
+    h1{ color:#ff00ea; margin:10px; }
+
+    #counter-container{
+        font-size:1.5rem;
+        padding:10px 20px;
+        border:2px dashed #ff00ea;
+        margin-bottom:10px;
+    }
+
+    #cooldown{
+        color:#ff4444;
+        height:30px;
+        font-size:1.2rem;
+    }
+
+    #horse-container{ cursor:pointer; }
+
+    #horse-image{
+        width:90vw;
+        max-width:400px;
+        height:300px;
+        object-fit:cover;
+        border:5px solid #fff;
+        border-radius:10px;
+        transition:0.1s;
+    }
+
+    #horse-container:active #horse-image{
+        transform:scale(0.95);
+    }
+
+    .plus-one{
+        position:absolute;
+        color:#00ffff;
+        font-size:2.5rem;
+        animation:float 0.7s forwards;
+        pointer-events:none;
+    }
+
+    @keyframes float{
+        to{
+            transform:translateY(-150px);
+            opacity:0;
+        }
+    }
+</style>
+
+</head>
+<body>
+
+<h1>ZWAŁ KONIA</h1>
+
+<div id="counter-container">
+    zwalonych koni: <span id="score">0</span>
+</div>
+
+<div id="cooldown"></div>
+
+<div id="horse-container">
+    <img id="horse-image" src="https://images.pexels.com/photos/1996333/pexels-photo-1996333.jpeg">
+</div>
+
+<audio id="horse-sound" preload="auto" playsinline>
+    <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8a1c0a6a5.mp3?filename=horse-neigh-6713.mp3">
+</audio>
+
+<script>
+let score = 0;
+let clicks = 0;
+let blocked = false;
+
+const scoreEl = document.getElementById('score');
+const cooldownEl = document.getElementById('cooldown');
+const horseImg = document.getElementById('horse-image');
+const horseSound = document.getElementById('horse-sound');
+const container = document.getElementById('horse-container');
+
+// zmiana obrazka
+setInterval(()=>{
+    horseImg.src = `https://loremflickr.com/400/300/horse?random=${Date.now()}`;
+},5000);
+
+// unlock audio (mobile fix)
+document.body.addEventListener('click',()=>{
+    horseSound.play().then(()=>{
+        horseSound.pause();
+        horseSound.currentTime=0;
+    }).catch(()=>{});
+},{once:true});
+
+container.addEventListener('click',handleClick);
+
+function handleClick(e){
+    if(blocked) return;
+
+    score++;
+    clicks++;
+
+    scoreEl.innerText = score;
+
+    playSound();
+    createPlusOne(e.clientX,e.clientY);
+
+    // cooldown rzadziej
+    if(clicks >= randomCooldownTrigger() && Math.random() < 0.35){
+        startCooldown();
+        clicks = 0;
+    }
+}
+
+function playSound(){
+    const s = horseSound.cloneNode(true);
+    s.volume = 0.6 + Math.random()*0.4;
+    s.playbackRate = 0.8 + Math.random()*0.4;
+    s.load();
+    s.play().catch(()=>{});
+}
+
+// 10–25 kliknięć
+function randomCooldownTrigger(){
+    return Math.floor(Math.random()*15)+10;
+}
+
+// 5–8 sekund blokady
+function startCooldown(){
+    blocked = true;
+
+    let time = 5 + Math.floor(Math.random()*4);
+    cooldownEl.innerText = "O NIE! SPUST ZABLOKOWANY PRZEZ: " + time;
+
+    const interval = setInterval(()=>{
+        time--;
+        cooldownEl.innerText = "masz blokade na spusta przez: " + time;
+
+        if(time <= 0){
+            clearInterval(interval);
+            cooldownEl.innerText = "";
+            blocked = false;
+        }
+    },1000);
+}
+
+function createPlusOne(x,y){
+    const el = document.createElement('div');
+    el.className='plus-one';
+    el.innerText='+1';
+    el.style.left=(x-20)+'px';
+    el.style.top=(y-50)+'px';
+    document.body.appendChild(el);
+    setTimeout(()=>el.remove(),700);
+}
+</script>
+
+</body>
+</html>
