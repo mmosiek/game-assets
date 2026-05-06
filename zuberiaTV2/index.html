@@ -14,6 +14,7 @@
 <script src="https://unpkg.com/videojs-hls-quality-selector@2.0.0/dist/videojs-hls-quality-selector.min.js"></script>
 <script src="https://unpkg.com/videojs-hotkeys@0.2.30/videojs.hotkeys.min.js"></script>
 
+<!-- YouTube -->
 <script src="https://unpkg.com/videojs-youtube/dist/Youtube.min.js"></script>
 
 <style>
@@ -22,26 +23,12 @@ html,body{
   margin:0;
   background:#000;
   overflow:hidden;
-  font-family:system-ui,Arial,sans-serif;
+  font-family:system-ui,Arial,sans-serif
 }
-
 .video-js{
   width:100%!important;
   height:100%!important;
   font-size:100%;
-}
-
-/* ekran błędu */
-#msg {
-  position:fixed;
-  inset:0;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  color:white;
-  font-size:18px;
-  text-align:center;
-  padding:20px;
 }
 </style>
 </head>
@@ -49,19 +36,14 @@ html,body{
 
 <video id="player" class="video-js vjs-default-skin vjs-ui-big" controls preload="auto" playsinline></video>
 
-<div id="msg" style="display:none;"></div>
-
 <script>
-function getUrlParam() {
+// ===== POBIERANIE LINKU Z URL =====
+function getStreamFromURL() {
   const params = new URLSearchParams(window.location.search);
-  return (params.get("url") || "").trim();
+  return params.get("src");
 }
 
-function showMessage(text) {
-  document.getElementById("msg").style.display = "flex";
-  document.getElementById("msg").innerText = text;
-}
-
+// ===== DETEKCJA TYPU =====
 async function detectType(url) {
   try {
     const res = await fetch(url, { method: "HEAD" });
@@ -86,25 +68,36 @@ async function detectType(url) {
     console.warn("HEAD fail:", e);
   }
 
+  // fallback
   if (url.includes("m3u8")) return "application/x-mpegURL";
   if (/youtube\.com|youtu\.be/.test(url)) return "video/youtube";
 
   return "video/mp4";
 }
 
-const player = videojs("player", { responsive: true });
+// ===== PLAYER =====
+const player = videojs("player", {
+  responsive: true,
+  html5: {
+    vhs: {
+      overrideNative: true
+    }
+  }
+});
 
+// ===== FULLSCREEN FIT =====
 const fit = () => {
   player.width(innerWidth);
   player.height(innerHeight);
 };
 
+// ===== START =====
 player.ready(async () => {
 
-  const streamUrl = getUrlParam();
+  const streamUrl = getStreamFromURL();
 
   if (!streamUrl) {
-    showMessage("Brak parametru ?url=\n\nPrzykład:\n?url=https://example.com/video.mp4");
+    alert("Dodaj ?src=URL w pasku adresu");
     return;
   }
 
@@ -112,17 +105,20 @@ player.ready(async () => {
 
   player.src({
     src: streamUrl,
-    type
+    type: type
   });
 
   fit();
   addEventListener("resize", fit);
   addEventListener("orientationchange", fit);
 
+  // pluginy
   player.hlsQualitySelector({ displayCurrentQuality: true });
-  player.hotkeys({ volumeStep: .1, seekStep: 5, enableModifiersForNumbers: false });
+  player.hotkeys({ volumeStep: 0.1, seekStep: 5, enableModifiersForNumbers: false });
 
-  try { await player.play(); } catch(e) {}
+  try {
+    await player.play();
+  } catch(e) {}
 });
 </script>
 
